@@ -1,5 +1,5 @@
 import { Audio, Img, initial, Layout, LayoutProps, Node, NodeProps, signal } from "@revideo/2d";
-import { all, chain, createRef, loopFor, SignalValue, SimpleSignal, waitFor } from "@revideo/core";
+import { all, chain, createRef, loop, loopFor, SignalValue, SimpleSignal, useThread, waitFor } from "@revideo/core";
 import { AudioHelper } from "./AudioHelper";
 
 export interface DogSpeechProps extends LayoutProps {
@@ -33,11 +33,25 @@ export class DogSpeech extends Layout {
     let anim_time = text.length / 30;
     // every .1 seconds, call a func
 
-    const audio_loop = loopFor(anim_time, () => { 
-      return all(this.audioHelper().playSample(), waitFor(0.05));
-    })
 
-    yield* all(this.animate_image(anim_time), audio_loop);
+    yield* this.audioHelper().playSingleSample(this.l[0]);
+
+    const ah = this.audioHelper;
+    const el = this.l;
+
+    useThread().spawn(function* () {
+      const tt = 0.1;
+      const fac = (1.0 / Math.max(tt, 0.001));
+      for (let i = 0; i < (fac * anim_time); i++) {
+        yield* ah().playSample();
+        yield* waitFor(tt);
+      }
+    });
+    
+    
+
+
+    yield* all(this.animate_image(anim_time));
   }
 
   private *animate_image(seconds: number) {

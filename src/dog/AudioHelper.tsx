@@ -11,12 +11,6 @@ export class AudioHelper extends Node {
     super(props);
     this.sources = [];
     this.nodes = [];
-
-    for (let i = 0; i < this.NODE_COUNT; i++) {
-      this.createNodeSync();
-    }
-
-    useLogger().warn("" + this.nodes.length);
   }
 
   public addSource(...src: Array<string>) {
@@ -39,13 +33,11 @@ export class AudioHelper extends Node {
     yield* this.addAndPlay(source);
   }
 
-  private *createNode() {
+  private *createNode(src: string = "/audio/bark1.wav") {
     const audioRef = createRef<Audio>();
-    const audioNode = <Audio ref={audioRef} src={"/audio/bark1.wav"} play={false}/>
+    const audioNode = <Audio ref={audioRef} src={src} play={false}/>
     yield this.add(audioNode);
     this.nodes.push(audioRef);
-
-    useLogger().warn("created new node");
 
     return audioRef;
   }
@@ -55,31 +47,29 @@ export class AudioHelper extends Node {
     const audioNode = <Audio ref={audioRef} src={"/audio/bark1.wav"} play={false}/>
     this.add(audioNode);
     this.nodes.push(audioRef);
-
-    useLogger().warn("created new node");
   }
 
-  private *replaceNode(index: number, source: string) {
-    useLogger().warn("replacing node " + index + " with " + source);
-    const audioRef = createRef<Audio>();
-    const audioNode = <Audio ref={audioRef} src={source} play={true}/>
-    yield this.add(audioNode);
-    this.nodes[index]().remove();
-    this.nodes[index] = (audioRef);
+  // private *replaceNode(index: number, source: string) {
+  //   useLogger().warn("replacing node " + index + " with " + source);
+  //   const audioRef = createRef<Audio>();
+  //   const audioNode = <Audio ref={audioRef} src={source} play={true}/>
+  //   yield this.add(audioNode);
+  //   this.nodes[index]().remove();
+  //   this.nodes[index] = (audioRef);
 
-    return audioRef;
-  }
+  //   return audioRef;
+  // }
 
-  private *addAndPlay(source: string) {
-    const audioRef = yield* this.createNode();
-
-    yield audioRef().src(source);
-    
+  private *addAndPlay(source: string = "/audio/bark1.wav") {
+    const audioRef = yield* this.createNode(source);
     yield audioRef().play();
   }
 
   public getRandomOffset() {
     const sample = Math.random();
     return Math.floor(sample * this.sources.length);
+    // const sample = this.offset;
+    // this.offset = (this.offset + 1) % this.sources.length;
+    // return sample;
   }
 }

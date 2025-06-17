@@ -7,23 +7,29 @@ import { ImageEvent } from './event/ImageEvent';
 import { PauseEvent } from './event/PauseEvent';
 import { TextEvent } from './event/TextEvent';
 import { HeadlineEvent } from './event/HeadlineEvent';
+import { VideoPlayer } from '../video/VideoPlayer';
+import { VideoEvent } from './event/VideoEvent';
+import { VideoStopEvent } from './event/VideoStopEvent';
 export class DialogueViewer {
 
   private readonly speech: Reference<DogSpeech>;
   private readonly dialogue: Reference<DialogueBox>;
   private readonly image: Reference<Img>;
   private readonly headline: Reference<Txt>;
+  private readonly videoPlayer: Reference<VideoPlayer>;
 
   public constructor(
     speech: Reference<DogSpeech>,
     dialogue: Reference<DialogueBox>,
     image: Reference<Img>,
-    headline: Reference<Txt>
+    headline: Reference<Txt>,
+    videoPlayer: Reference<VideoPlayer>
   ) {
     this.speech = speech;
     this.dialogue = dialogue;
     this.image = image;
     this.headline = headline;
+    this.videoPlayer = videoPlayer;
   }
 
   public *handleEvent(event: IBaseEvent): any {
@@ -35,6 +41,11 @@ export class DialogueViewer {
       yield* this.handleText(event as TextEvent);
     } else if (event instanceof HeadlineEvent) {
       yield* this.handleHeadline(event as HeadlineEvent);
+    } else if (event instanceof VideoEvent) {
+      yield* this.handleVideo(event as VideoEvent);
+      // would like to duck the bg audio while this is playing
+    } else if (event instanceof VideoStopEvent) {
+      yield* this.handleVideoStop(event as VideoStopEvent);
     }
   }
 
@@ -61,5 +72,13 @@ export class DialogueViewer {
     this.headline().opacity(1.0);
     this.dialogue().opacity(0.0);
     yield* this.speech().play_sound("/audio/ping.wav");
+  }
+
+  private *handleVideo(event: VideoEvent) {
+    yield* this.videoPlayer().playVideo(event.src, event.volume);
+  }
+
+  private *handleVideoStop(event: VideoStopEvent) {
+    yield* this.videoPlayer().stopVideo();
   }
 }

@@ -3,6 +3,8 @@ import { IBaseEvent } from "./event/IBaseEvent";
 import { ImageEvent } from "./event/ImageEvent";
 import { PauseEvent } from "./event/PauseEvent";
 import { TextEvent } from "./event/TextEvent";
+import { VideoEvent } from "./event/VideoEvent";
+import { VideoStopEvent } from "./event/VideoStopEvent";
 
 
 export class DialogueParser {
@@ -33,6 +35,12 @@ export class DialogueParser {
         case "headline":
           res.push(this.parseHeadline(elem));
           break;
+        case "video":
+          res.push(this.parseVideo(elem));
+          break;
+        case "video-stop":
+          res.push(this.parseVideoStop(elem));
+          break;
       }
     }
   
@@ -60,5 +68,15 @@ export class DialogueParser {
   private parseHeadline(e: Element) : IBaseEvent {
     let content = e.textContent;
     return new HeadlineEvent(content);
+  }
+
+  private parseVideo(e: Element) : IBaseEvent {
+    let source = e.attributes.getNamedItem("src")?.value ?? "";
+    let volume = e.attributes.getNamedItem("volume")?.value ?? "0.0";
+    return new VideoEvent(source, parseFloat(volume));
+  }
+
+  private parseVideoStop(e: Element) : IBaseEvent { 
+    return new VideoStopEvent(); 
   }
 };

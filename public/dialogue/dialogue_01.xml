@@ -11,12 +11,16 @@
   <headline>Crudfish Cuisine</headline>
   <pause duration="1.5" />
   <img src="/res/01/crudfish.jpg" />
+
+  <video src="/video/clam.mov" volume="0.0"/>
+  <pause duration="1.5" />
   <text>What? They cooked a crudfish and called it a "fish taco"?</text>
   <pause duration="1" />
   <text>A bit barbaric if you ask me, but it's not my place to judge...</text>
   <pause duration="1" />
   <text>No matter!</text>
   <pause duration="1" />
+  <video-stop />
   <img src="" />
   <text>Once again, thank you for tuning into "Myths and Stories News!"</text>
   <pause duration="1.5" />

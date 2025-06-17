@@ -5,6 +5,9 @@ import { DogSpeech } from "./dog/DogSpeech";
 import { DialogueParser } from "./dialogue/DialogueParser";
 import { IBaseEvent } from './dialogue/event/IBaseEvent';
 import { DialogueViewer } from "./dialogue/DialogueViewer";
+import { VideoPlayer } from "./video/VideoPlayer";
+
+import "./css/test.css"
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -40,6 +43,7 @@ function fetchSynchronously(url: string) {
 const scene = makeScene2D('scene', function* (view) {
   const dialogueRef = createRef<DialogueBox>();
   const dogRef = createRef<DogSpeech>();
+  const videoRef = createRef<VideoPlayer>();
   const imageRef = createRef<Img>();
   const audioRef = createRef<Audio>();
   const titleRef = createRef<Txt>();
@@ -66,6 +70,10 @@ const scene = makeScene2D('scene', function* (view) {
   view.add(
     <Img src={"/dog/newsstand.png"} size={[2560, 1440]} position={[0, 300]}/>
   )
+
+  yield view.add(
+    <VideoPlayer ref={videoRef} />
+  );
 
   view.add(
     <DialogueBox ref={dialogueRef} size={['100%', '100%']} opacity={0.0}/>
@@ -96,21 +104,16 @@ const scene = makeScene2D('scene', function* (view) {
   
   const dialogue = useScene().variables.get("dialogue", "/dialogue/testdialogue.xml");
   const content = fetchSynchronously(dialogue());
-  console.log(content);
   const g = new DialogueParser();
   const events = g.parseDom(content);
 
-  const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef);
-
-  console.log(events);
+  const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef, videoRef);
 
   for (let i = 0; i < events.length; i++) {
     yield* viewer.handleEvent(events[i]);
   }
 
-  yield* tween(1.5, (value) => {
-    audioRef().setVolume((1.0 - value) * 0.75 + 0.25);
-  })
+  yield* waitFor(0.5);
 });
 
 const dialogue_path = "/dialogue/dialogue_01.xml"
@@ -125,7 +128,7 @@ export default makeProject({
     },
 
     rendering: {
-      fps: 30
+      fps: 60
     },
 
     preview: {
