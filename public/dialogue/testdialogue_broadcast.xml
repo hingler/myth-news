@@ -1,0 +1,17 @@
+<broadcast>
+  <head>
+    <!-- title image -->
+    <title duration="2.5">Myths and Story's News</title>
+    <bgm src="/audio/newsflash.m4a" />
+  </head>
+  <doc>
+    <scene tag="newscast">
+      <head>
+        // descriptors
+      </head>
+      <content>
+      </content>
+    </scene>
+
+  </doc>
+</broadcast>

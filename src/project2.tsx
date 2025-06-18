@@ -51,8 +51,15 @@ const scene = makeScene2D('scene', function* (view) {
 
   const headlineRef = createRef<Txt>();
 
+  const dialogue = useScene().variables.get("dialogue", "/dialogue/testdialogue.xml");
+  const content = fetchSynchronously(dialogue());
+  const g = new DialogueParser();
+  const broadcastInfo = g.parseDom(content);
+  const sceneInfo = broadcastInfo.scenes;
+  const events = sceneInfo[0].content;
+
   view.add(
-    <Audio src="/audio/newsflash.m4a" ref={audioRef}/>
+    <Audio src={broadcastInfo.musicSrc} ref={audioRef}/>
   )
 
   view.add(
@@ -84,7 +91,7 @@ const scene = makeScene2D('scene', function* (view) {
   )
 
   view.add(
-    <Txt ref={titleRef} text={"Myths and Stories News"} fontFamily={"Comic Sans MS"} position={[-1080, 0]}
+    <Txt ref={titleRef} text={broadcastInfo.title} fontFamily={"Comic Sans MS"} position={[-1080, 0]}
     {...titleStyle}
     />
   );
@@ -96,16 +103,13 @@ const scene = makeScene2D('scene', function* (view) {
   yield audioRef().play();
 
 
-  let titleAnim = titleRef().position([-35, 0], .1, linear).to([35, 0], 2.7, linear).to([1080, 0], 0.1, linear)
-  let opacityAnim = fadeRef().opacity(0.5, 2.7).to(0.0, 0.2);
+  let titleAnim = titleRef().position([-35, 0], .1, linear)
+    .to([35, 0], broadcastInfo.titleDuration, linear)
+    .to([1080, 0], 0.1, linear)
+
+  let opacityAnim = fadeRef().opacity(0.5, broadcastInfo.titleDuration).to(0.0, 0.2);
 
   yield* all(titleAnim, opacityAnim);
-
-  
-  const dialogue = useScene().variables.get("dialogue", "/dialogue/testdialogue.xml");
-  const content = fetchSynchronously(dialogue());
-  const g = new DialogueParser();
-  const events = g.parseDom(content);
 
   const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef, videoRef, audioRef, fadeRef);
 
