@@ -4,7 +4,7 @@ async function render() {
   console.log('Rendering video...');
 
   // This is the main function that renders the video
-  const dialogue_path = "/dialogue/dialogue_01.xml"
+  const dialogue_path = "/dialogue/dialogue_02.xml"
   const file = await renderVideo({
     projectFile: './src/project2.tsx',
     variables: { dialogue: dialogue_path },

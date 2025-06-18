@@ -116,7 +116,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/dialogue/dialogue_01.xml"
+const dialogue_path = "/dialogue/dialogue_02.xml"
 
 export default makeProject({
   scenes: [scene],

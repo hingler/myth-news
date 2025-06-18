@@ -1,0 +1,27 @@
+<doc>
+  <text>Welcome to today's episode of "Myths and Stories News!"</text>
+  <pause duration="1" />
+  <text>And now, for today's top story...</text>
+  <pause duration="1" />
+  <headline>Fast Loris Coming Soon!</headline>
+  <pause duration="1.5" />
+  <img src="/res/02/image/fast_loris.png" />
+  <text>For the first time ever, the slow loris is being buffed!</text>
+  <pause duration="1" />
+  <transition duration="0.2" />
+  <video src="/res/02/video/fast_loris.mp4" volume="0.0" playbackRate="3.0" />
+  <pause duration="0.5" />
+  <text>The slow loris's movement speed has been increased by 125 percent!</text>
+  <pause duration="1" />
+  <text>In addition, its attack and magic stats have each been increased by 3 tiers!</text>
+  <pause duration="1" />
+  <transition duration="0.2" />
+  <video-stop />
+  <text>The buff is set to take effect following next Tuesday's scheduled maintenance window.</text>
+  <pause duration="1" />
+  <text>Be sure to check it out!</text>
+  <pause duration="1" />
+  <img src="" />
+  <text>That's all for today... thanks for tuning into "Myths and Story's News!"</text>
+  <pause duration="1" />
+</doc>
