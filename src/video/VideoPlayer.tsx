@@ -17,7 +17,7 @@ export class VideoPlayer extends Layout {
     )
   }
 
-  public *playVideo(src: string, volume: number) {
+  public *playVideo(src: string, volume: number, playbackRate: number) {
     yield* this.stopVideo();
     this.videoFG().src(src);
     this.videoBG().src(src);
@@ -37,6 +37,9 @@ export class VideoPlayer extends Layout {
 
     this.videoFG().opacity(1.0);
     this.videoBG().opacity(1.0);
+
+    this.videoFG().playbackRate(playbackRate);
+    this.videoBG().playbackRate(playbackRate);
 
     this.videoFG().play();
     this.videoBG().play();

@@ -77,7 +77,8 @@ export class DialogueParser {
   private parseVideo(e: Element) : IBaseEvent {
     let source = e.attributes.getNamedItem("src")?.value ?? "";
     let volume = e.attributes.getNamedItem("volume")?.value ?? "0.0";
-    return new VideoEvent(source, parseFloat(volume));
+    let playbackRate = e.attributes.getNamedItem("playbackRate")?.value ?? "1.0";
+    return new VideoEvent(source, parseFloat(volume), parseFloat(playbackRate));
   }
 
   private parseVideoStop(e: Element) : IBaseEvent { 

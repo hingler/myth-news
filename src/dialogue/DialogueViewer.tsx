@@ -87,7 +87,7 @@ export class DialogueViewer {
   private *handleVideo(event: VideoEvent) {
     this.headline().opacity(0.0);
     this.bgAudio().setVolume(0.25 + 0.75 * (1.0 - event.volume));
-    yield* this.videoPlayer().playVideo(event.src, event.volume);
+    yield* this.videoPlayer().playVideo(event.src, event.volume, event.playbackRate);
   }
 
   private *handleVideoStop(event: VideoStopEvent) {
@@ -97,8 +97,9 @@ export class DialogueViewer {
 
   private *handleTransition(event: TransitionEvent) {
     this.headline().opacity(0.0);
-    this.fade().fill(event.color);
+    this.dialogue().opacity(0.0);
     this.fade().opacity(0.0);
+    this.fade().fill(event.color);
     yield* this.fade().opacity(1.0, event.duration);
 
     // let events begin here

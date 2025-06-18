@@ -11,7 +11,7 @@
   <headline>Crudfish Cuisine</headline>
   <pause duration="1.5" />
   <transition duration="0.2" />
-  <video src="/video/clam.mov" volume="0.0"/>
+  <video src="/video/clam.mov" volume="0.0" playbackRate="2.0"/>
   <img src="/res/01/crudfish.jpg" />
 
   <pause duration="1.5" />
