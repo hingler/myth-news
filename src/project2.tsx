@@ -107,7 +107,7 @@ const scene = makeScene2D('scene', function* (view) {
   const g = new DialogueParser();
   const events = g.parseDom(content);
 
-  const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef, videoRef);
+  const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef, videoRef, audioRef, fadeRef);
 
   for (let i = 0; i < events.length; i++) {
     yield* viewer.handleEvent(events[i]);

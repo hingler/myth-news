@@ -1,7 +1,7 @@
 import { all, Reference, waitFor } from '@revideo/core';
 import { DogSpeech } from '../dog/DogSpeech';
 import { DialogueBox } from './DialogueBox';
-import { Img, Txt } from '@revideo/2d';
+import { Audio, Img, Rect, Txt } from '@revideo/2d';
 import { IBaseEvent } from './event/IBaseEvent';
 import { ImageEvent } from './event/ImageEvent';
 import { PauseEvent } from './event/PauseEvent';
@@ -10,6 +10,7 @@ import { HeadlineEvent } from './event/HeadlineEvent';
 import { VideoPlayer } from '../video/VideoPlayer';
 import { VideoEvent } from './event/VideoEvent';
 import { VideoStopEvent } from './event/VideoStopEvent';
+import { TransitionEvent } from './event/TransitionEvent';
 export class DialogueViewer {
 
   private readonly speech: Reference<DogSpeech>;
@@ -17,19 +18,26 @@ export class DialogueViewer {
   private readonly image: Reference<Img>;
   private readonly headline: Reference<Txt>;
   private readonly videoPlayer: Reference<VideoPlayer>;
+  private readonly bgAudio: Reference<Audio>;
+  private readonly fade: Reference<Rect>;
 
   public constructor(
     speech: Reference<DogSpeech>,
     dialogue: Reference<DialogueBox>,
     image: Reference<Img>,
     headline: Reference<Txt>,
-    videoPlayer: Reference<VideoPlayer>
+    videoPlayer: Reference<VideoPlayer>,
+    bgAudio: Reference<Audio>,
+    rectRef: Reference<Rect>
   ) {
     this.speech = speech;
     this.dialogue = dialogue;
     this.image = image;
     this.headline = headline;
     this.videoPlayer = videoPlayer;
+    this.bgAudio = bgAudio;
+
+    this.fade = rectRef;
   }
 
   public *handleEvent(event: IBaseEvent): any {
@@ -46,6 +54,8 @@ export class DialogueViewer {
       // would like to duck the bg audio while this is playing
     } else if (event instanceof VideoStopEvent) {
       yield* this.handleVideoStop(event as VideoStopEvent);
+    } else if (event instanceof TransitionEvent) {
+      yield* this.handleTransition(event as TransitionEvent);
     }
   }
 
@@ -75,10 +85,23 @@ export class DialogueViewer {
   }
 
   private *handleVideo(event: VideoEvent) {
+    this.headline().opacity(0.0);
+    this.bgAudio().setVolume(0.25 + 0.75 * (1.0 - event.volume));
     yield* this.videoPlayer().playVideo(event.src, event.volume);
   }
 
   private *handleVideoStop(event: VideoStopEvent) {
+    this.bgAudio().setVolume(1.0);
     yield* this.videoPlayer().stopVideo();
+  }
+
+  private *handleTransition(event: TransitionEvent) {
+    this.headline().opacity(0.0);
+    this.fade().fill(event.color);
+    this.fade().opacity(0.0);
+    yield* this.fade().opacity(1.0, event.duration);
+
+    // let events begin here
+    yield this.fade().opacity(0.0, event.duration);
   }
 }

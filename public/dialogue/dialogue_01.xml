@@ -10,9 +10,10 @@
   <img src="" />
   <headline>Crudfish Cuisine</headline>
   <pause duration="1.5" />
+  <transition duration="0.2" />
+  <video src="/video/clam.mov" volume="0.0"/>
   <img src="/res/01/crudfish.jpg" />
 
-  <video src="/video/clam.mov" volume="0.0"/>
   <pause duration="1.5" />
   <text>What? They cooked a crudfish and called it a "fish taco"?</text>
   <pause duration="1" />

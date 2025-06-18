@@ -3,6 +3,7 @@ import { IBaseEvent } from "./event/IBaseEvent";
 import { ImageEvent } from "./event/ImageEvent";
 import { PauseEvent } from "./event/PauseEvent";
 import { TextEvent } from "./event/TextEvent";
+import { TransitionEvent } from "./event/TransitionEvent";
 import { VideoEvent } from "./event/VideoEvent";
 import { VideoStopEvent } from "./event/VideoStopEvent";
 
@@ -41,6 +42,9 @@ export class DialogueParser {
         case "video-stop":
           res.push(this.parseVideoStop(elem));
           break;
+        case "transition":
+          res.push(this.parseTransition(elem));
+          break;
       }
     }
   
@@ -78,5 +82,11 @@ export class DialogueParser {
 
   private parseVideoStop(e: Element) : IBaseEvent { 
     return new VideoStopEvent(); 
+  }
+
+  private parseTransition(e: Element) : IBaseEvent {
+    let duration = e.attributes.getNamedItem("duration")?.value ?? "0.25";
+    let color = e.attributes.getNamedItem("color")?.value ?? "#FFFFFF";
+    return new TransitionEvent(parseFloat(duration), color);
   }
 };
