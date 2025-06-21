@@ -1,16 +1,24 @@
 import { Audio, Node, NodeProps } from "@revideo/2d";
 import { createRef, Logger, Reference, useLogger, waitFor } from "@revideo/core";
+import { INewsContext } from '../context/INewsContext';
+
+export interface AudioHelperProps extends NodeProps {
+  context: INewsContext;
+}
 
 export class AudioHelper extends Node {
   private sources: Array<string>;
   private nodes: Array<Reference<Audio>>;
 
+  private context: INewsContext;
+
   private readonly NODE_COUNT = 5;
   private offset = 0;
-  public constructor(props: NodeProps) {
+  public constructor(props: AudioHelperProps) {
     super(props);
     this.sources = [];
     this.nodes = [];
+    this.context = props.context;
   }
 
   public addSource(...src: Array<string>) {
@@ -61,8 +69,9 @@ export class AudioHelper extends Node {
   // }
 
   private *addAndPlay(source: string = "/audio/bark1.wav") {
-    const audioRef = yield* this.createNode(source);
-    yield audioRef().play();
+    // const audioRef = yield* this.createNode(source);
+    // yield audioRef().play();
+    yield* this.context.getAudioPlayer().playSample(source);
   }
 
   public getRandomOffset() {

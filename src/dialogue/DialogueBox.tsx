@@ -26,8 +26,8 @@ export class DialogueBox extends Rect {
     )
   }
 
-  public *speak(text: string) {
-    let anim_time = text.length / 30;
+  public *speak(text: string, speed: number = 1.0) {
+    let anim_time = text.length / (30 * speed);
 
     yield* tween(anim_time, (value) => {
       let state = value * text.length;

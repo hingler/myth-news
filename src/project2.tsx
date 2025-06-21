@@ -1,13 +1,23 @@
-import { Audio, brightness, FILTERS, Img, Layout, makeScene2D, Rect, Scene2D, Txt, TxtProps } from "@revideo/2d";
+import { Audio, brightness, FILTERS, Img, Layout, makeScene2D, Node, Rect, Scene2D, Txt, TxtProps } from "@revideo/2d";
 import { all, createRef, linear, makeProject, tween, useScene, waitFor } from "@revideo/core";
 import { DialogueBox } from "./dialogue/DialogueBox";
 import { DogSpeech } from "./dog/DogSpeech";
 import { DialogueParser } from "./dialogue/DialogueParser";
 import { IBaseEvent } from './dialogue/event/IBaseEvent';
-import { DialogueViewer } from "./dialogue/DialogueViewer";
 import { VideoPlayer } from "./video/VideoPlayer";
 
 import "./css/test.css"
+import { SimpleAudioPlayer } from "./context/impl/SimpleAudioPlayer";
+import { SimpleColorOverlay } from "./context/impl/SimpleColorOverlay";
+import { SimpleTextHandle } from "./context/impl/SimpleTextHandle";
+import { SimpleNewsContext } from "./context/impl/SimpleNewsContext";
+import { NewsroomScene } from "./scene/NewsroomScene";
+import { INewsScene } from "./scene/INewsScene";
+import { SceneEvent } from "./dialogue/event/SceneEvent";
+import { SceneInfo } from "./dialogue/parser/SceneInfo";
+import { BroadcastRunner } from "./scene/BroadcastRunner";
+import { SimpleSceneFactory } from "./scene/SimpleSceneFactory";
+import moment from "moment";
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -28,6 +38,11 @@ const subtitleStyle : TxtProps = {
   ...baseTitle
 }
 
+const dateStyle : TxtProps = {
+  fontSize: 60,
+  ...baseTitle
+}
+
 function fetchSynchronously(url: string) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", url, false); // 'false' makes the request synchronous
@@ -41,10 +56,6 @@ function fetchSynchronously(url: string) {
 }
 
 const scene = makeScene2D('scene', function* (view) {
-  const dialogueRef = createRef<DialogueBox>();
-  const dogRef = createRef<DogSpeech>();
-  const videoRef = createRef<VideoPlayer>();
-  const imageRef = createRef<Img>();
   const audioRef = createRef<Audio>();
   const titleRef = createRef<Txt>();
   const fadeRef = createRef<Rect>();
@@ -55,72 +66,83 @@ const scene = makeScene2D('scene', function* (view) {
   const content = fetchSynchronously(dialogue());
   const g = new DialogueParser();
   const broadcastInfo = g.parseDom(content);
-  const sceneInfo = broadcastInfo.scenes;
-  const events = sceneInfo[0].content;
+  const events = broadcastInfo.events;
 
+  // base node
+  // generify "audioplayer" to a thing with handles and shit
+  // (ex. for music)
   view.add(
     <Audio src={broadcastInfo.musicSrc} ref={audioRef}/>
   )
 
-  view.add(
-    <Img ref={imageRef} position={[0, -240]} height={1440} opacity={1.0} src={"/news/backdrop.png"} filters={[ brightness(0.5) ]}/>
-  )
+  const sceneRoot = createRef<Node>();
+  const playerRef = createRef<SimpleAudioPlayer>();
 
-  view.add(
-    <Img ref={imageRef} position={[220, -250]} size={[600,450]} src={"/news/pukeko.jpg"} opacity={0.0}/>
-  )
-
-  view.add(
-    <DogSpeech ref={dogRef} left={[-200, 150]} scale={1.2}/>
-  )
-
-  view.add(
-    <Img src={"/dog/newsstand.png"} size={[2560, 1440]} position={[0, 300]}/>
-  )
-
-  yield view.add(
-    <VideoPlayer ref={videoRef} />
-  );
-
-  view.add(
-    <DialogueBox ref={dialogueRef} size={['100%', '100%']} opacity={0.0}/>
-  )
+  yield view.add(<Node ref={sceneRoot}></Node>);
+  // base node
 
   view.add(
     <Rect fill={"#000000"} ref={fadeRef} opacity={.5} size={['100%', '100%']}/>
   )
 
-  view.add(
-    <Txt ref={titleRef} text={broadcastInfo.title} fontFamily={"Comic Sans MS"} position={[-1080, 0]}
+  // base node
+
+  const layoutRef = createRef<Layout>();
+  view.add(<Layout direction={"column"} layout ref={layoutRef} position={[-1080, 0]} />)
+  layoutRef().add(
+    <Txt ref={titleRef} text={broadcastInfo.title} fontFamily={"Comic Sans MS"} position={[0, 0]}
     {...titleStyle}
     />
   );
 
+  const d = moment().format("MMMM Do, YYYY");
+
+  layoutRef().add(
+    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>{d}</Txt.i>
+  );
+
+  // base node?
   view.add(
-    <Txt ref={headlineRef} {...subtitleStyle} text={"dasdasd"} position={[0, 720]} opacity={0.0}/>
+    <Layout layout position={[0, 720]} margin={32}>
+      <Txt ref={headlineRef} {...subtitleStyle} text={""} position={[0, 720]} opacity={1.0}/>
+    </Layout>
   )
 
+  yield view.add(
+    <SimpleAudioPlayer ref={playerRef} />
+  );
+
+  let context = new SimpleNewsContext(
+    new SimpleColorOverlay(fadeRef),
+    playerRef,
+    new SimpleTextHandle(headlineRef)
+  );
+
+  let scene : INewsScene = new NewsroomScene();
+  // interview scene
+  // root ref so we can just lob off the whole thing
+  // or just purge sceneRoot of all its children
+  let runner = new BroadcastRunner(sceneRoot, new SimpleSceneFactory(), context);
   yield audioRef().play();
+  yield* runner.initializeScene(scene);
 
 
-  let titleAnim = titleRef().position([-35, 0], .1, linear)
+
+  let titleAnim = layoutRef().position([-35, 0], .1, linear)
     .to([35, 0], broadcastInfo.titleDuration, linear)
     .to([1080, 0], 0.1, linear)
 
   let opacityAnim = fadeRef().opacity(0.5, broadcastInfo.titleDuration).to(0.0, 0.2);
 
+
   yield* all(titleAnim, opacityAnim);
 
-  const viewer = new DialogueViewer(dogRef, dialogueRef, imageRef, headlineRef, videoRef, audioRef, fadeRef);
-
-  for (let i = 0; i < events.length; i++) {
-    yield* viewer.handleEvent(events[i]);
-  }
+  yield* runner.runBroadcast(broadcastInfo);
 
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/dialogue/dialogue_02.xml"
+const dialogue_path = "/res/05/dialogue_05.xml"
 
 export default makeProject({
   scenes: [scene],

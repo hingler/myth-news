@@ -8,6 +8,7 @@ import { TransitionEvent } from "./event/TransitionEvent";
 import { VideoEvent } from "./event/VideoEvent";
 import { VideoStopEvent } from "./event/VideoStopEvent";
 import { BroadcastInfo, SceneInfo } from "./parser/SceneInfo";
+import { SceneEvent } from "./event/SceneEvent";
 
 
 export class DialogueParser {
@@ -28,19 +29,7 @@ export class DialogueParser {
     }
     
     let broadcastInfo = this.parseHeader(broadcast);
-    let scenes = doc.getElementsByTagName("scene");
-
-    if (scenes.length == 0) {
-      broadcastInfo.scenes = [ this.parseDocAsScene(doc) ];
-    } else {
-
-      let res : Array<SceneInfo> = [];
-      for (let i = 0; i < scenes.length; i++) {
-        res.push(this.parseScene(scenes[i]));
-      }
-
-      broadcastInfo.scenes = res;
-    }
+    broadcastInfo.events = this.parseContent(doc);
 
     return broadcastInfo;
   }
@@ -66,39 +55,6 @@ export class DialogueParser {
 
   private getChildAttribute(root: Element | null, tagName: string, attributeName: string, initial: string) : string {
     return root?.getElementsByTagName(tagName)[0]?.getAttribute(attributeName) ?? initial;
-  }
-
-  // parses the doc itself as an individual scene
-  private parseDocAsScene(rootDoc: Element | null) {
-    let res = new SceneInfo();
-    res.tag = "";
-    res.descriptors = {};
-    res.content = this.parseContent(rootDoc);
-
-    return res;
-  }
-
-  // parse a single scene element
-  private parseScene(root: Element) {
-    let res = new SceneInfo();
-    res.tag = root.getAttribute("tag") ?? "";
-
-    res.descriptors = {};
-
-    let header = root.getElementsByTagName("head");
-    if (header.length > 0) {
-      // parse head
-      // tack onto descriptors
-    }
-
-    let content = root.getElementsByTagName("content");
-    if (content.length > 0) {
-      // parse content
-      res.content = this.parseContent(content[0]);
-      
-    }
-
-    return res;
   }
 
   // parses a content node (containing some number of events)
@@ -133,9 +89,36 @@ export class DialogueParser {
         return this.parseVideoStop(elem);
       case "transition":
         return this.parseTransition(elem);
+      case "scene":
+        return this.parseScene(elem);
       default:
         return null;
     }
+  }
+
+  private parseScene(scene: Element) : IBaseEvent {
+    let info = new SceneInfo();
+    info.tag = scene.getAttribute("tag") ?? "interview";
+
+    info.descriptors = {};
+
+    let header = scene.getElementsByTagName("head")[0];
+    let content = scene.getElementsByTagName("content")[0];
+    if (header != null) {
+      // parse head
+      // tack onto descriptors
+
+      if (content != null) {
+        info.events = this.parseContent(content);
+      }
+    } else {
+      // assume no header, no content tag
+      info.events = this.parseContent(scene);
+    }
+
+    
+
+    return new SceneEvent(info);
   }
   
   private parseImg(e: Element) : IBaseEvent {
@@ -146,13 +129,14 @@ export class DialogueParser {
   }
 
   private parsePause(e: Element) : IBaseEvent {
-    let duration = e.attributes.getNamedItem("duration").value ?? "0.0";
-    return new PauseEvent(parseFloat(duration) ?? 0.0);
+    let duration = e.attributes.getNamedItem("duration")?.value ?? "1.0";
+    return new PauseEvent(parseFloat(duration) ?? 1.0);
   }
 
   private parseText(e: Element) : IBaseEvent {
     let content = e.textContent;
-    return new TextEvent(content);
+    let speed = e.getAttribute("speed") ?? "1.0";
+    return new TextEvent(content, parseFloat(speed));
   }
 
   private parseHeadline(e: Element) : IBaseEvent {

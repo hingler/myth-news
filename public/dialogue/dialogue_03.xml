@@ -1,0 +1,37 @@
+<broadcast>
+  <head>
+    <title duration="2.5">Myth and Story's News</title>
+    <bgm src="/audio/report_a.mp3" />
+  </head>
+  <doc>
+    <text>Welcome to our evening broadcast of "Myths and Stories News".</text>
+    <pause duration="1" />
+    <text>Without further ado, here's the news...</text>
+    <pause duration="1" />
+    <headline>Uncanny Fish Event</headline>
+    <pause duration="1.5" />
+    <img src="/res/03/phish.jpg" />
+    <text>What a surprise... Funny Fish was once again spotted fiending for some grub.</text>
+    <pause duration="1" />
+    <text>As a reminder, we ask that you not leave any food or drink unattended near Funny Fish's hunting ground.</text>
+    <pause duration="1" />
+    <transition duration="0.2" />
+    <video src="/res/03/phish.mp4" volume="0.0" />
+    <pause duration="0.5" />
+    <text>Funny Fish can smell your food, and will dawdle if it catches a whiff of your delectable treats.</text>
+    <pause duration="1" />
+    <text>Please do not do this.</text>
+    <pause duration="1" />
+    <text>Your negligence endangers your life, as well as the lives of your community members.</text>
+    <pause duration="1" />
+    <transition duration="0.2" />
+    <video-stop />
+    <img src="" />
+    <pause duration="0.5" />
+
+    <text>Well, that's all the time we have today!</text>
+    <pause duration="1" />
+    <text>Tune in next week for another episode of "Myth and Story's News"!</text>
+    <pause duration="1" />
+  </doc>
+</broadcast>

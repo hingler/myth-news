@@ -1,14 +1,18 @@
 import { IBaseEvent } from "../event/IBaseEvent";
 
-export class SceneInfo {
+export interface IEventList {
+  events: Array<IBaseEvent>;
+}
+
+export class SceneInfo implements IEventList {
   tag: string;
-  content: Array<IBaseEvent>;
+  events: Array<IBaseEvent>;
   descriptors: object;
 }
 
-export class BroadcastInfo {
+export class BroadcastInfo implements IEventList {
   title: string;
   titleDuration: number;
   musicSrc: string;
-  scenes: Array<SceneInfo>;
+  events: Array<IBaseEvent>;
 }

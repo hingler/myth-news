@@ -11,8 +11,8 @@ export class VideoPlayer extends Layout {
 
     this.add(
       <Layout>
-        <Video minHeight={"100%"} minWidth={"100%"} src={"/video/puffer.mov"} ref={this.videoBG} playbackRate={1.0} opacity={0.0} volume={0.0} filters={[ blur(16), brightness(0.5) ]}/>
-        <Video maxHeight={"100%"} maxWidth={"100%"} src={"/video/puffer.mov"} ref={this.videoFG} playbackRate={1.0} opacity={0.0} volume={0.0}/>
+        <Video minHeight={"100%"} minWidth={"100%"} src={"/video/puffer.mov"} ref={this.videoBG} playbackRate={1.0} opacity={0.0} volume={0.0} loop={true} filters={[ blur(16), brightness(0.5) ]}/>
+        <Video maxHeight={"100%"} maxWidth={"100%"} src={"/video/puffer.mov"} ref={this.videoFG} playbackRate={1.0} opacity={0.0} volume={0.0} loop={true}/>
       </Layout>
     )
   }

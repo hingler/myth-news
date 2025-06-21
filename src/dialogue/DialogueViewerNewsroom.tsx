@@ -1,4 +1,4 @@
-import { all, Reference, waitFor } from '@revideo/core';
+import { all, Reference, tween, waitFor } from '@revideo/core';
 import { DogSpeech } from '../dog/DogSpeech';
 import { DialogueBox } from './DialogueBox';
 import { Audio, Img, Rect, Txt } from '@revideo/2d';
@@ -11,33 +11,29 @@ import { VideoPlayer } from '../video/VideoPlayer';
 import { VideoEvent } from './event/VideoEvent';
 import { VideoStopEvent } from './event/VideoStopEvent';
 import { TransitionEvent } from './event/TransitionEvent';
-export class DialogueViewer {
+import { SceneEvent } from './event/SceneEvent';
+import { ITextHandle } from '../context/ITextHandle';
+import { INewsContext } from '../context/INewsContext';
+export class DialogueViewerNewsroom {
 
   private readonly speech: Reference<DogSpeech>;
   private readonly dialogue: Reference<DialogueBox>;
   private readonly image: Reference<Img>;
-  private readonly headline: Reference<Txt>;
   private readonly videoPlayer: Reference<VideoPlayer>;
-  private readonly bgAudio: Reference<Audio>;
-  private readonly fade: Reference<Rect>;
+  private readonly context: INewsContext;
 
   public constructor(
     speech: Reference<DogSpeech>,
     dialogue: Reference<DialogueBox>,
     image: Reference<Img>,
-    headline: Reference<Txt>,
     videoPlayer: Reference<VideoPlayer>,
-    bgAudio: Reference<Audio>,
-    rectRef: Reference<Rect>
+    context: INewsContext
   ) {
     this.speech = speech;
     this.dialogue = dialogue;
     this.image = image;
-    this.headline = headline;
     this.videoPlayer = videoPlayer;
-    this.bgAudio = bgAudio;
-
-    this.fade = rectRef;
+    this.context = context;
   }
 
   public *handleEvent(event: IBaseEvent): any {
@@ -56,6 +52,8 @@ export class DialogueViewer {
       yield* this.handleVideoStop(event as VideoStopEvent);
     } else if (event instanceof TransitionEvent) {
       yield* this.handleTransition(event as TransitionEvent);
+    } else if (event instanceof SceneEvent) {
+      yield* this.handleScene(event as SceneEvent);
     }
   }
 
@@ -70,39 +68,48 @@ export class DialogueViewer {
 
   private *handleText(event: TextEvent) {
     this.dialogue().opacity(1.0);
-    this.headline().opacity(0.0);
+    this.context.getHeadlineHandle().setContent("");
     yield* all(
-      this.dialogue().speak(event.content),
-      this.speech().speak(event.content)
+      this.dialogue().speak(event.content, event.speed),
+      this.speech().speak(event.content, event.speed)
     );
   }
 
   private *handleHeadline(event: HeadlineEvent) {
-    this.headline().text(event.title);
-    this.headline().opacity(1.0);
+    this.context.getHeadlineHandle().setContent(event.title);
     this.dialogue().opacity(0.0);
     yield* this.speech().play_sound("/audio/ping.wav");
   }
 
   private *handleVideo(event: VideoEvent) {
-    this.headline().opacity(0.0);
-    this.bgAudio().setVolume(0.25 + 0.75 * (1.0 - event.volume));
+    this.context.getHeadlineHandle().setContent("");
+    // tba
+    // this.context.getAudioPlayer().setVolume(0.25 + 0.75 * (1.0 - event.volume));
     yield* this.videoPlayer().playVideo(event.src, event.volume, event.playbackRate);
   }
 
   private *handleVideoStop(event: VideoStopEvent) {
-    this.bgAudio().setVolume(1.0);
+    // tba
+    // this.bgAudio().setVolume(1.0);
     yield* this.videoPlayer().stopVideo();
   }
 
   private *handleTransition(event: TransitionEvent) {
-    this.headline().opacity(0.0);
+    this.context.getHeadlineHandle().setContent("");
     this.dialogue().opacity(0.0);
-    this.fade().opacity(0.0);
-    this.fade().fill(event.color);
-    yield* this.fade().opacity(1.0, event.duration);
+    this.context.getOverlay().setOpacity(0.0);
+    this.context.getOverlay().setColor(event.color);
+    yield* tween(event.duration, t => this.context.getOverlay().setOpacity(t));
 
     // let events begin here
-    yield this.fade().opacity(0.0, event.duration);
+    yield tween(event.duration, t => this.context.getOverlay().setOpacity(1.0 - t));
+  }
+
+  private *handleScene(event: SceneEvent) {
+    const events = event.info.events;
+    for (let i = 0; i < events.length; i++) {
+      // we need to do some shit to tell it what scene to open next
+      yield* this.handleEvent(event);
+    }
   }
 }
