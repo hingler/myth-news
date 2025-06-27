@@ -7,12 +7,13 @@ export interface IEventList {
 export class SceneInfo implements IEventList {
   tag: string;
   events: Array<IBaseEvent>;
-  descriptors: object;
+  descriptors: Map<string, string>;
 }
 
 export class BroadcastInfo implements IEventList {
   title: string;
   titleDuration: number;
   musicSrc: string;
+  defaultPause: boolean;
   events: Array<IBaseEvent>;
 }

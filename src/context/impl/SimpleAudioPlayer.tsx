@@ -14,8 +14,7 @@ export class SimpleAudioPlayer extends Node implements IAudioPlayer {
     this.cullPlayers();
     const audioRef = createRef<Audio>();
     // or: run on thread and make the method sync??
-    yield this.add(<Audio ref={audioRef} src={src} play={false}/>);
-    yield audioRef().play();
+    yield this.add(<Audio ref={audioRef} src={src} play={true}/>);
   }
 
   private cullPlayers() {

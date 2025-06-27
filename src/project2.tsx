@@ -98,7 +98,7 @@ const scene = makeScene2D('scene', function* (view) {
   const d = moment().format("MMMM Do, YYYY");
 
   layoutRef().add(
-    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>{d}</Txt.i>
+    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>June 25th, 2025</Txt.i>
   );
 
   // base node?
@@ -142,7 +142,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/05/dialogue_05.xml"
+const dialogue_path = "/res/09/dialogue_09.xml"
 
 export default makeProject({
   scenes: [scene],

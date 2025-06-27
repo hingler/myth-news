@@ -7,7 +7,7 @@ async function render() {
   
   const dialogue_path = "/res/04/dialogue_04.xml"
   const file = await renderVideo({
-    projectFile: './src/project2.tsx',
+    projectFile: './src/project_test.tsx',
     variables: { dialogue: dialogue_path },
     settings: {logProgress: true},
   });

@@ -12,6 +12,7 @@ import { SceneEvent } from "./event/SceneEvent";
 
 
 export class DialogueParser {
+  private defaultPause: boolean = true;
   public parseDom(content: string) : BroadcastInfo {
     let parser = new DOMParser();
   
@@ -41,10 +42,13 @@ export class DialogueParser {
     let title = this.getChildContent(headElement, "title", "Myths and Stories News");
     let duration = this.getChildAttribute(headElement, "title", "duration", "2.7");
     let music = this.getChildAttribute(headElement, "bgm", "src", "/audio/newsflash.m4a");
+    let defaultPause = this.getChildContent(headElement, "defaultPause", "");
+
 
     res.title = title;
     res.titleDuration = parseFloat(duration);
     res.musicSrc = music;
+    this.defaultPause = (defaultPause.length > 0) && (defaultPause !== "false");
 
     return res;
   }
@@ -64,35 +68,46 @@ export class DialogueParser {
     for (let i = 0; i < ce.length; i++) {
       let elem = ce[i];
       let event = this.parseContentTag(elem);
-      if (event != null) {
-        res.push(event);
+      if (event.length > 0) {
+        res.push(...event);
       }
     }
 
     return res;
   }
 
+  private parseSceneHeader(headerElem: Element) : Map<string, string> {
+    let res = new Map<string, string>();
+    let ce = headerElem.children;
+    for (let i = 0; i < ce.length; i++) {
+      const e = ce[i];
+      res.set(e.tagName, e.textContent);
+    }
+
+    return res;
+  }
+
   // parses a single content tag as an event
-  private parseContentTag(elem: Element) : IBaseEvent {
+  private parseContentTag(elem: Element) : Array<IBaseEvent> {
     switch (elem.nodeName.toLowerCase()) {
       case "img":
-        return this.parseImg(elem);
+        return [ this.parseImg(elem) ];
       case "pause":
-        return this.parsePause(elem);
+        return [ this.parsePause(elem) ];
       case "text":
         return this.parseText(elem);
       case "headline":
         return this.parseHeadline(elem);
       case "video":
-        return this.parseVideo(elem);
+        return [ this.parseVideo(elem) ];
       case "video-stop":
-        return this.parseVideoStop(elem);
+        return [ this.parseVideoStop(elem) ];
       case "transition":
-        return this.parseTransition(elem);
+        return [ this.parseTransition(elem) ];
       case "scene":
-        return this.parseScene(elem);
+        return [ this.parseScene(elem) ];
       default:
-        return null;
+        return [];
     }
   }
 
@@ -100,19 +115,18 @@ export class DialogueParser {
     let info = new SceneInfo();
     info.tag = scene.getAttribute("tag") ?? "interview";
 
-    info.descriptors = {};
-
     let header = scene.getElementsByTagName("head")[0];
     let content = scene.getElementsByTagName("content")[0];
-    if (header != null) {
+    if (header != null && content != null) {
       // parse head
       // tack onto descriptors
-
-      if (content != null) {
-        info.events = this.parseContent(content);
-      }
+      info.descriptors = this.parseSceneHeader(header);
+      info.events = this.parseContent(content);
+    } else if (content != null) {
+      // no header but we have a content tag
+      info.events = this.parseContent(content);
     } else {
-      // assume no header, no content tag
+      // no header, no content - just parse body as content
       info.events = this.parseContent(scene);
     }
 
@@ -133,15 +147,26 @@ export class DialogueParser {
     return new PauseEvent(parseFloat(duration) ?? 1.0);
   }
 
-  private parseText(e: Element) : IBaseEvent {
+  private parseText(e: Element) : Array<IBaseEvent> {
     let content = e.textContent;
     let speed = e.getAttribute("speed") ?? "1.0";
-    return new TextEvent(content, parseFloat(speed));
+    let speaker = e.getAttribute("speaker") ?? "";
+    let event : Array<IBaseEvent> = [ new TextEvent(content, parseFloat(speed), speaker) ];
+    if (this.defaultPause) {
+      event.push(new PauseEvent(1.0));
+    }
+
+    return event;
   }
 
-  private parseHeadline(e: Element) : IBaseEvent {
+  private parseHeadline(e: Element) : Array<IBaseEvent> {
     let content = e.textContent;
-    return new HeadlineEvent(content);
+    let event : Array<IBaseEvent> = [ new HeadlineEvent(content) ]
+    if (this.defaultPause) {
+      event.push(new PauseEvent(1.5));
+    }
+
+    return event;
   }
 
   private parseVideo(e: Element) : IBaseEvent {
