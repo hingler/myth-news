@@ -41,7 +41,6 @@ const scene = makeScene2D("scene", function* (view) {
   );
 
   let scene : INewsScene = new HoroscopeScene(
-    context,
     ["very soon, you will hear a buzzer.", "please consider this."],
     [1, 19, 33, 35, 42, 57]
   );

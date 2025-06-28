@@ -55,6 +55,10 @@ function fetchSynchronously(url: string) {
   }
 }
 
+function* makeIntro(view: Scene2D) {
+  
+}
+
 const scene = makeScene2D('scene', function* (view) {
   const audioRef = createRef<Audio>();
   const titleRef = createRef<Txt>();
@@ -63,14 +67,15 @@ const scene = makeScene2D('scene', function* (view) {
   const headlineRef = createRef<Txt>();
 
   const dialogue = useScene().variables.get("dialogue", "/dialogue/testdialogue.xml");
-  const content = fetchSynchronously(dialogue());
+  const content = useScene().variables.get("dialogue_content", "");
   const g = new DialogueParser();
-  const broadcastInfo = g.parseDom(content);
+  const broadcastInfo = g.parseDom(content());
   const events = broadcastInfo.events;
 
   // base node
   // generify "audioplayer" to a thing with handles and shit
   // (ex. for music)
+
   view.add(
     <Audio src={broadcastInfo.musicSrc} ref={audioRef}/>
   )
@@ -78,7 +83,7 @@ const scene = makeScene2D('scene', function* (view) {
   const sceneRoot = createRef<Node>();
   const playerRef = createRef<SimpleAudioPlayer>();
 
-  yield view.add(<Node ref={sceneRoot}></Node>);
+  view.add(<Node ref={sceneRoot}></Node>);
   // base node
 
   view.add(
@@ -89,6 +94,7 @@ const scene = makeScene2D('scene', function* (view) {
 
   const layoutRef = createRef<Layout>();
   view.add(<Layout direction={"column"} layout ref={layoutRef} position={[-1080, 0]} />)
+  
   layoutRef().add(
     <Txt ref={titleRef} text={broadcastInfo.title} fontFamily={"Comic Sans MS"} position={[0, 0]}
     {...titleStyle}
@@ -98,7 +104,7 @@ const scene = makeScene2D('scene', function* (view) {
   const d = moment().format("MMMM Do, YYYY");
 
   layoutRef().add(
-    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>June 25th, 2025</Txt.i>
+    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>{d}</Txt.i>
   );
 
   // base node?
@@ -108,23 +114,9 @@ const scene = makeScene2D('scene', function* (view) {
     </Layout>
   )
 
-  yield view.add(
+  view.add(
     <SimpleAudioPlayer ref={playerRef} />
   );
-
-  let context = new SimpleNewsContext(
-    new SimpleColorOverlay(fadeRef),
-    playerRef,
-    new SimpleTextHandle(headlineRef)
-  );
-
-  let scene : INewsScene = new NewsroomScene();
-  // interview scene
-  // root ref so we can just lob off the whole thing
-  // or just purge sceneRoot of all its children
-  let runner = new BroadcastRunner(sceneRoot, new SimpleSceneFactory(), context);
-  yield audioRef().play();
-  yield* runner.initializeScene(scene);
 
 
 
@@ -134,6 +126,23 @@ const scene = makeScene2D('scene', function* (view) {
 
   let opacityAnim = fadeRef().opacity(0.5, broadcastInfo.titleDuration).to(0.0, 0.2);
 
+  let scene : INewsScene = new NewsroomScene();
+  // interview scene
+  // root ref so we can just lob off the whole thing
+  // or just purge sceneRoot of all its children
+
+  let context = new SimpleNewsContext(
+    new SimpleColorOverlay(fadeRef),
+    playerRef,
+    new SimpleTextHandle(headlineRef)
+  );
+
+  let runner = new BroadcastRunner(sceneRoot, new SimpleSceneFactory(), context);
+
+  // play this if we're doing a broadcast
+  // ie if the 
+  yield audioRef().play();
+  yield* runner.initializeScene(scene);
 
   yield* all(titleAnim, opacityAnim);
 
@@ -142,7 +151,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/09/dialogue_09.xml"
+const dialogue_path = "/res/10/dialogue.xml"
 
 export default makeProject({
   scenes: [scene],

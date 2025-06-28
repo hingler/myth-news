@@ -7,6 +7,7 @@ import { DialogueBox } from "../dialogue/DialogueBox";
 import { SimpleSpeechPlayer } from "../dog/SimpleSpeechPlayer";
 import moment, { duration } from "moment";
 import { TextEvent } from "../dialogue/event/TextEvent";
+import { SceneInfo } from '../dialogue/parser/SceneInfo';
 
 export class HoroscopeScene implements INewsScene {
 
@@ -17,24 +18,28 @@ export class HoroscopeScene implements INewsScene {
   private readonly numbers: Array<number>;
 
 
-  private readonly speechPlayer : SimpleSpeechPlayer;
+  private speechPlayer : SimpleSpeechPlayer;
 
   public constructor(
-    context: INewsContext,
     fortune: Array<string>,
     numbers: Array<number>
   ) {
-    this.speechPlayer = new SimpleSpeechPlayer(context);
-    // this.speechPlayer.AddSample("/res/09/txt.wav");
-    // this.speechPlayer.AddSample("/res/09/txt2.wav");
-    this.speechPlayer.AddSample("/res/09/txt4.wav");
-
     this.fortune = fortune;
     this.numbers = numbers;
   }
 
+  public static fromScene(scene: SceneInfo) : INewsScene {
+    let fortune : Array<string> = scene.descriptors.get("fortune").split("\n").filter(v => v.length > 0).map(v => v.trim());
+    let numbers : Array<number> = scene.descriptors.get("numbers").split(/\w/).filter(v => v.length > 0).map(v => parseInt(v.trim())).sort();
+    return new HoroscopeScene(fortune, numbers);
+  }
+
   public *CreateScene(sceneRoot: Reference<Node>, context: INewsContext) {
-    yield* context.getAudioPlayer().playSample("/res/09/wifi.m4a");
+    this.speechPlayer = new SimpleSpeechPlayer(context);
+    this.speechPlayer.AddSample("/res/09/txt4.wav");
+
+    let h = context.getAudioPlayer().getHandle("/res/09/wifi.m4a");
+    yield* h.play();
     sceneRoot().add(
       <Video src={"/res/09/bg.mp4"} size={['100%', '100%']} play={true}/>
     );
@@ -83,6 +88,7 @@ export class HoroscopeScene implements INewsScene {
     baseRef().remove();
 
     yield* this.HandleNumbers(sceneRoot);
+    yield* waitFor(0.5);
   }
 
   private *HandleNumbers(sceneRoot: Reference<Node>) {

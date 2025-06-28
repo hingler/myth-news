@@ -1,7 +1,7 @@
 import { Node } from "@revideo/2d";
 import { INewsContext } from "../context/INewsContext";
 import { ISceneFactory } from './ISceneFactory';
-import { Reference } from "@revideo/core";
+import { createRef, Reference } from "@revideo/core";
 import { BroadcastInfo, IEventList, SceneInfo } from "../dialogue/parser/SceneInfo";
 import { INewsScene } from "./INewsScene";
 import { SceneEvent } from "../dialogue/event/SceneEvent";
@@ -10,6 +10,7 @@ export class BroadcastRunner {
   private readonly root: Reference<Node>;
   private readonly fac: ISceneFactory;
   private readonly ctx: INewsContext;
+  private rootChild: Reference<Node> = null;
 
   private currentScene: INewsScene;
 
@@ -20,8 +21,15 @@ export class BroadcastRunner {
   }
 
   public *initializeScene(scene: INewsScene) {
-    this.root().removeChildren();
-    yield* scene.CreateScene(this.root, this.ctx);
+    const newChild = createRef<Node>();
+    yield this.root().add(<Node ref={newChild}></Node>);
+    yield* scene.CreateScene(newChild, this.ctx);
+
+    if (this.rootChild != null) {
+      yield this.rootChild().remove();
+    }
+
+    this.rootChild = newChild;
     this.currentScene = scene;
   }
 
@@ -31,10 +39,9 @@ export class BroadcastRunner {
   }
 
   public *runScene(info: SceneInfo) : any {
-    this.currentScene.FinishScene();
+    yield* this.currentScene.FinishScene();
     let newScene = this.fac.createScene(info);
     yield* this.initializeScene(newScene);
-
     yield* this.runEventList(info);
   }
 
