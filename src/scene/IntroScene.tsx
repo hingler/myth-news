@@ -5,6 +5,7 @@ import { INewsContext } from "../context/INewsContext";
 import { Layout, Node, Rect, Txt, TxtProps } from "@revideo/2d";
 import moment from "moment";
 import { IBaseEvent } from "../dialogue/event/IBaseEvent";
+import { SceneInfo } from "../dialogue/parser/SceneInfo";
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -42,8 +43,16 @@ export class IntroScene implements INewsScene {
     this.bgmSrc = bgmSrc;
   }
 
+  public static fromScene(info: SceneInfo) : IntroScene {
+    let title = info.descriptors.get("title") ?? "Myth and Story News";
+    let bgm = info.descriptors.get("bgmSrc") ?? "/audio/newsflash.m4a";
+    let duration = parseFloat(info.descriptors.get("duration") ?? "2.7");
+
+    return new IntroScene(title, duration, bgm);
+  }
+
   public *CreateScene(root: Reference<Node>, context: INewsContext) {
-    this.d.CreateScene(root, context);
+    yield* this.d.CreateScene(root, context);
     const titleRef = createRef<Txt>();
     const layoutRef = createRef<Layout>();
     const fadeRef = createRef<Rect>();
@@ -72,10 +81,14 @@ export class IntroScene implements INewsScene {
 
     let opacityAnim = fadeRef().opacity(0.5, this.duration).to(0.0, 0.2);
 
-    yield context.getAudioPlayer().playSample(this.bgmSrc);
+    yield* context.getAudioPlayer().playSample(this.bgmSrc);
     yield* all(titleAnim, opacityAnim);
   }
 
-  public *HandleEvent(event: IBaseEvent) {}
-  public *FinishScene() {}
+  public *HandleEvent(event: IBaseEvent) {
+    yield* this.d.HandleEvent(event);
+  }
+  public *FinishScene() {
+    yield* this.d.FinishScene();
+  }
 }

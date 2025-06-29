@@ -18,6 +18,7 @@ import { SceneInfo } from "./dialogue/parser/SceneInfo";
 import { BroadcastRunner } from "./scene/BroadcastRunner";
 import { SimpleSceneFactory } from "./scene/SimpleSceneFactory";
 import moment from "moment";
+import { IntroScene } from "./scene/IntroScene";
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -67,18 +68,21 @@ const scene = makeScene2D('scene', function* (view) {
   const headlineRef = createRef<Txt>();
 
   const dialogue = useScene().variables.get("dialogue", "/dialogue/testdialogue.xml");
-  const content = useScene().variables.get("dialogue_content", "");
+  let content = useScene().variables.get("dialogue_content", "")();
+  if (content.length == 0) {
+    content = fetchSynchronously(dialogue());
+  }
   const g = new DialogueParser();
-  const broadcastInfo = g.parseDom(content());
+  const broadcastInfo = g.parseDom(content);
   const events = broadcastInfo.events;
 
   // base node
   // generify "audioplayer" to a thing with handles and shit
   // (ex. for music)
 
-  view.add(
-    <Audio src={broadcastInfo.musicSrc} ref={audioRef}/>
-  )
+  // view.add(
+  //   <Audio src={broadcastInfo.musicSrc} ref={audioRef}/>
+  // )
 
   const sceneRoot = createRef<Node>();
   const playerRef = createRef<SimpleAudioPlayer>();
@@ -87,26 +91,12 @@ const scene = makeScene2D('scene', function* (view) {
   // base node
 
   view.add(
-    <Rect fill={"#000000"} ref={fadeRef} opacity={.5} size={['100%', '100%']}/>
+    <Rect fill={"#000000"} ref={fadeRef} opacity={0.0} size={['100%', '100%']}/>
   )
 
   // base node
 
-  const layoutRef = createRef<Layout>();
-  view.add(<Layout direction={"column"} layout ref={layoutRef} position={[-1080, 0]} />)
-  
-  layoutRef().add(
-    <Txt ref={titleRef} text={broadcastInfo.title} fontFamily={"Comic Sans MS"} position={[0, 0]}
-    {...titleStyle}
-    />
-  );
-
   const d = moment().format("MMMM Do, YYYY");
-
-  layoutRef().add(
-    <Txt.i fontFamily={"Comic Sans MS"} {...dateStyle} marginTop={32}>{d}</Txt.i>
-  );
-
   // base node?
   view.add(
     <Layout layout position={[0, 720]} margin={32}>
@@ -117,16 +107,6 @@ const scene = makeScene2D('scene', function* (view) {
   view.add(
     <SimpleAudioPlayer ref={playerRef} />
   );
-
-
-
-  let titleAnim = layoutRef().position([-35, 0], .1, linear)
-    .to([35, 0], broadcastInfo.titleDuration, linear)
-    .to([1080, 0], 0.1, linear)
-
-  let opacityAnim = fadeRef().opacity(0.5, broadcastInfo.titleDuration).to(0.0, 0.2);
-
-  let scene : INewsScene = new NewsroomScene();
   // interview scene
   // root ref so we can just lob off the whole thing
   // or just purge sceneRoot of all its children
@@ -138,20 +118,20 @@ const scene = makeScene2D('scene', function* (view) {
   );
 
   let runner = new BroadcastRunner(sceneRoot, new SimpleSceneFactory(), context);
-
-  // play this if we're doing a broadcast
-  // ie if the 
-  yield audioRef().play();
-  yield* runner.initializeScene(scene);
-
-  yield* all(titleAnim, opacityAnim);
+  if (!(broadcastInfo.events[0] instanceof SceneEvent)) {
+    runner.initializeScene(new IntroScene(
+      broadcastInfo.title,
+      broadcastInfo.titleDuration,
+      broadcastInfo.musicSrc
+    ));
+  }
 
   yield* runner.runBroadcast(broadcastInfo);
 
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/10/dialogue.xml"
+const dialogue_path = "/res/09/dialogue_09.xml"
 
 export default makeProject({
   scenes: [scene],

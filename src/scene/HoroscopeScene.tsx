@@ -29,8 +29,8 @@ export class HoroscopeScene implements INewsScene {
   }
 
   public static fromScene(scene: SceneInfo) : INewsScene {
-    let fortune : Array<string> = scene.descriptors.get("fortune").split("\n").filter(v => v.length > 0).map(v => v.trim());
-    let numbers : Array<number> = scene.descriptors.get("numbers").split(/\w/).filter(v => v.length > 0).map(v => parseInt(v.trim())).sort();
+    let fortune : Array<string> = scene.descriptors.get("fortune").split("\n").map(v => v.trim()).filter(v => v.length > 0);
+    let numbers : Array<number> = scene.descriptors.get("numbers").split("\n").map(v => v.trim()).filter(v => v.length > 0).map(v => parseInt(v));
     return new HoroscopeScene(fortune, numbers);
   }
 
@@ -50,7 +50,7 @@ export class HoroscopeScene implements INewsScene {
     baseRef().add(
       <Layout layout ref={this.horoscopeRef} direction={"column"} alignItems={"center"} fontFamily={"Lexend"} fontWeight={500} position={[0, -432]} opacity={0.0} shadowColor={"#FFFFFF"} shadowBlur={16}>
         <Txt fill={"white"} fontSize={60}>your fortune for...</Txt>
-        <Txt fill={"white"} fontSize={89}>{moment().add(1, 'days').format("MMMM Do, YYYY")}</Txt>
+        <Txt fill={"white"} fontSize={89}>{moment().format("MMMM Do, YYYY")}</Txt>
         {/* <Txt fill={"white"} fontSize={576} ref={this.horoscopeRef}>♋︎</Txt> */}
       </Layout>
     )
