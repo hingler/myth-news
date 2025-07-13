@@ -99,8 +99,8 @@ const scene = makeScene2D('scene', function* (view) {
   const d = moment().format("MMMM Do, YYYY");
   // base node?
   view.add(
-    <Layout layout position={[0, 720]} margin={32}>
-      <Txt ref={headlineRef} {...subtitleStyle} text={""} position={[0, 720]} opacity={1.0}/>
+    <Layout layout position={[0, 600]} margin={128}>
+      <Txt ref={headlineRef} {...subtitleStyle} text={""} position={[0, 600]} opacity={1.0}/>
     </Layout>
   )
 
@@ -131,7 +131,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/09/dialogue_09.xml"
+const dialogue_path = "/res/17/dialogue.xml"
 
 export default makeProject({
   scenes: [scene],

@@ -17,10 +17,15 @@ export class DogSpeech extends Layout {
   private readonly dogImage = createRef<Img>();
   private readonly imageRoot = createRef<Layout>();
   private readonly audioHelper = createRef<AudioHelper>();
+  private readonly audioHelper_bup = createRef<AudioHelper>();
 
   private readonly player: IAudioPlayer;
 
-  private readonly l = ["/audio/bark1.wav", "/audio/bark2.wav", "/audio/bark3.wav", "/audio/bark4.wav", "/audio/bark5.wav", "/audio/bark6.wav", "/audio/bark7.wav"];
+  private readonly l = ["bark1.wav", "bark2.wav", "bark3.wav", "bark4.wav", "bark5.wav", "bark6.wav", "bark7.wav"];
+  private readonly pre = "/audio/";
+  private readonly pret = "/audio/bark/"
+  
+  private flag = false;
 
   public constructor(props?: DogSpeechProps) {
     super({...props});
@@ -28,12 +33,19 @@ export class DogSpeech extends Layout {
       <Layout ref={this.imageRoot} position={[0, 200]}>
         <Img src={"/dog/oniondog_stencil.png"} position={[0, -200]} size={[700, 700]} ref={this.dogImage}/>
         <AudioHelper ref={this.audioHelper} context={props.context}/>
+        <AudioHelper ref={this.audioHelper_bup} context={props.context} />
       </Layout>
     );
 
     this.player = props.context.getAudioPlayer();
 
-    this.audioHelper().addSource(...this.l);
+    const a = this.l.map(s => this.pre + s);
+    const at = this.l.map(s => this.pret + s);
+
+    this.audioHelper().addSource(...a);
+    this.audioHelper_bup().addSource(...at);
+
+    this.flag = false;
   }
 
   public *speak(text: string, speed: number = 1.0) {
@@ -41,12 +53,22 @@ export class DogSpeech extends Layout {
     // every .1 seconds, call a func
 
     const ah = this.audioHelper;
+    const aht = this.audioHelper_bup;
+
+    const that = this;
 
     useThread().spawn(function* () {
       const tt = 0.1 / speed;
       const fac = (1.0 / Math.max(tt, 0.001));
       for (let i = 0; i < (fac * anim_time); i++) {
-        yield* ah().playSample();
+        if (that.flag) {
+          yield* aht().playSample();
+        } else {
+          yield* ah().playSample();
+        }
+
+        that.flag = !that.flag;
+
         yield* waitFor(tt);
       }
     });

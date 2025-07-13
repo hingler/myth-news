@@ -34,8 +34,8 @@ export class DialogueBox extends Rect {
     this.color(DialogueBox.g);
 
     this.add(
-      <Rect layout size={["100%", "25%"]} bottom={this.bottom} fill={() => this.color()} radius={32}>
-        <Txt ref={this.textRef} size={['100%', '100%']} margin={[64, 64]} fontSize={64} textWrap={true} fill={() => this.textFill()} fontFamily={() => this.font()}>
+      <Rect layout size={["85%", "25%"]} position={[0, 640]} stroke={"#000000"} lineWidth={4} fill={() => this.color()} radius={32}>
+        <Txt ref={this.textRef} size={['100%', '100%']} margin={[64, 64]} fontSize={54} textWrap={true} fill={() => this.textFill()} fontFamily={() => this.font()}>
         </Txt>
       </Rect>
     )

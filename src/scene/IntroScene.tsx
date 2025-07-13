@@ -17,7 +17,7 @@ const baseTitle : TxtProps = {
 }
 
 const titleStyle = {
-  fontSize: 140,
+  fontSize: 128,
   ...baseTitle
 }
 
@@ -64,7 +64,7 @@ export class IntroScene implements INewsScene {
     root().add(<Layout direction={"column"} layout ref={layoutRef} position={[-1080, 0]} />)
     
     layoutRef().add(
-      <Txt ref={titleRef} text={this.title} fontFamily={"Comic Sans MS"} position={[0, 0]}
+      <Txt ref={titleRef} text={this.title} fontFamily={"Comic Sans MS"} position={[0, 0]} padding={32}
       {...titleStyle}
       />
     );

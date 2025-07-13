@@ -7,7 +7,6 @@ import { SceneInfo } from "../dialogue/parser/SceneInfo";
 import { IBaseEvent } from "../dialogue/event/IBaseEvent";
 import { SimpleSpeechAnimator } from "../dog/SimpleSpeechAnimator";
 import { DialogueViewerInterview } from "../dialogue/DialogueViewerInterview";
-import { TextEvent } from "../dialogue/event/TextEvent";
 
 export class InterviewScene implements INewsScene {
 
@@ -28,8 +27,8 @@ export class InterviewScene implements INewsScene {
 
   public static fromScene(scene: SceneInfo) : InterviewScene {
     return new InterviewScene(
-      scene.descriptors.get("speakerSrc"),
-      scene.descriptors.get("backdropSrc"),
+      scene.descriptors.get("speakerSrc") ?? "",
+      scene.descriptors.get("backdropSrc") ?? "",
       scene
     );
   }
@@ -62,7 +61,7 @@ export class InterviewScene implements INewsScene {
     )
 
     contentRef().add(
-      <SimpleSpeechAnimator ref={animatorRef} speakerOffset={400} position={[0, 525]} speakerSrc={"/res/05/alba.png"} />
+      <SimpleSpeechAnimator ref={animatorRef} speakerOffset={400} position={[0, 525]} speakerSrc={this.speakerSrc} />
     )
 
     this.viewer = new DialogueViewerInterview(this.dialogueRef, animatorRef, context);

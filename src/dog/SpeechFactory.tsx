@@ -15,9 +15,13 @@ export class SpeechFactory {
     switch (name) {
       case "alba":
       case "smego":
-        const player = this.getPlayer(this.smegoSpeechSamples);
-        player.speak_speed = 5.0;
-        return player;
+        const player_smego = this.getPlayer(this.smegoSpeechSamples);
+        player_smego.speak_speed = 5.0;
+        return player_smego;
+      case "generic":
+        const player_generic = this.getPlayer([ "/res/09/txt4.wav" ]);
+        player_generic.speak_speed = 30.0;
+        return player_generic;
       default:
         return this.getPlayer(this.dogSpeechSamples);
     }

@@ -18,7 +18,7 @@ async function render() {
 
   // This is the main function that renders the video
   
-  const dialogue_path = "./public/res/fortune/01.xml"
+  const dialogue_path = "./public/res/17/dialogue.xml"
   const content = ((await readFile(dialogue_path)).toString());
   const file = await renderVideo({
     projectFile: './src/project2.tsx',
