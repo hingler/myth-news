@@ -3,4 +3,5 @@ export interface IAudioHandle {
   pause() : any;
 
   setVolume(vol: number): any;
+  setVolume(vol: number, duration: number): any;
 }

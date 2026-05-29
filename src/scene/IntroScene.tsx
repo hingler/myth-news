@@ -93,7 +93,9 @@ export class IntroScene implements INewsScene {
     yield* this.d.HandleEvent(event);
   }
   public *FinishScene() {
-    yield* this.bgm?.pause();
+    // tba: add some means of tagging this handle
+    //      so we can pick it up in another scene
+    yield this.bgm?.setVolume(0.0, 2.5);
     yield* this.d.FinishScene();
   }
 }

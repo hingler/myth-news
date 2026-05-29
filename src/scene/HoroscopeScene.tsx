@@ -38,9 +38,6 @@ export class HoroscopeScene implements INewsScene {
     this.speechPlayer = new SimpleSpeechPlayer(context);
     this.speechPlayer.AddSample("/res/09/txt4.wav");
 
-    context.getAudioPlayer().stop();
-    let h = context.getAudioPlayer().getHandle("/res/09/wifi.m4a");
-    yield* h.play();
     sceneRoot().add(
       <Video src={"/res/09/bg.mp4"} size={['100%', '100%']} play={true}/>
     );
@@ -68,6 +65,9 @@ export class HoroscopeScene implements INewsScene {
     this.speechPlayer.read_speed = 15.0;
     this.dialogueRef().read_speed = 15.0;
 
+    yield* waitFor(1.0);
+    let h = context.getAudioPlayer().getHandle("/res/09/wifi.m4a");
+    yield* h.play();
     yield* waitFor(0.5);
     yield* all(
       this.horoscopeRef().position([0, -288], 1.5, easeOutQuad),
