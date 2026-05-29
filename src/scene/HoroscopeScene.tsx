@@ -38,6 +38,7 @@ export class HoroscopeScene implements INewsScene {
     this.speechPlayer = new SimpleSpeechPlayer(context);
     this.speechPlayer.AddSample("/res/09/txt4.wav");
 
+    context.getAudioPlayer().stop();
     let h = context.getAudioPlayer().getHandle("/res/09/wifi.m4a");
     yield* h.play();
     sceneRoot().add(
@@ -104,7 +105,7 @@ export class HoroscopeScene implements INewsScene {
 
     const arr : Array<Reference<Txt>> = [];
 
-    
+
     for (let i = 0; i < this.numbers.length; i++) {
       const nref = createRef<Txt>();
       yield compartmentRef().add(

@@ -1,5 +1,5 @@
 import { Audio, brightness, FILTERS, Img, Layout, makeScene2D, Node, Rect, Scene2D, Txt, TxtProps } from "@revideo/2d";
-import { all, createRef, linear, makeProject, tween, useScene, waitFor } from "@revideo/core";
+import { all, createRef, linear, makeProject, tween, useLogger, useScene, waitFor } from "@revideo/core";
 import { DialogueBox } from "./dialogue/DialogueBox";
 import { DogSpeech } from "./dog/DogSpeech";
 import { DialogueParser } from "./dialogue/DialogueParser";
@@ -57,7 +57,7 @@ function fetchSynchronously(url: string) {
 }
 
 function* makeIntro(view: Scene2D) {
-  
+
 }
 
 const scene = makeScene2D('scene', function* (view) {
@@ -73,6 +73,8 @@ const scene = makeScene2D('scene', function* (view) {
     content = fetchSynchronously(dialogue());
   }
   const g = new DialogueParser();
+
+  useLogger().info("content: \n" + content);
   const broadcastInfo = g.parseDom(content);
   const events = broadcastInfo.events;
 
@@ -131,7 +133,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/17/dialogue.xml"
+const dialogue_path = "/res/21/dialogue.xml"
 
 export default makeProject({
   scenes: [scene],

@@ -6,6 +6,7 @@ import { Layout, Node, Rect, Txt, TxtProps } from "@revideo/2d";
 import moment from "moment";
 import { IBaseEvent } from "../dialogue/event/IBaseEvent";
 import { SceneInfo } from "../dialogue/parser/SceneInfo";
+import { IAudioHandle } from "../context/IAudioHandle";
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -31,9 +32,10 @@ export class IntroScene implements INewsScene {
   private readonly title: string;
   private readonly duration: number;
   private readonly bgmSrc: string;
+  private bgm: IAudioHandle | null;
 
   public constructor(
-    title: string, 
+    title: string,
     duration: number,
     bgmSrc: string
   ) {
@@ -41,6 +43,7 @@ export class IntroScene implements INewsScene {
     this.title = title;
     this.duration = duration;
     this.bgmSrc = bgmSrc;
+    this.bgm = null;
   }
 
   public static fromScene(info: SceneInfo) : IntroScene {
@@ -62,7 +65,7 @@ export class IntroScene implements INewsScene {
     )
 
     root().add(<Layout direction={"column"} layout ref={layoutRef} position={[-1080, 0]} />)
-    
+
     layoutRef().add(
       <Txt ref={titleRef} text={this.title} fontFamily={"Comic Sans MS"} position={[0, 0]} padding={32}
       {...titleStyle}
@@ -81,7 +84,8 @@ export class IntroScene implements INewsScene {
 
     let opacityAnim = fadeRef().opacity(0.5, this.duration).to(0.0, 0.2);
 
-    yield* context.getAudioPlayer().playSample(this.bgmSrc);
+    this.bgm = yield context.getAudioPlayer().getHandle(this.bgmSrc);
+    yield* this.bgm.play();
     yield* all(titleAnim, opacityAnim);
   }
 
@@ -89,6 +93,7 @@ export class IntroScene implements INewsScene {
     yield* this.d.HandleEvent(event);
   }
   public *FinishScene() {
+    yield* this.bgm?.pause();
     yield* this.d.FinishScene();
   }
 }

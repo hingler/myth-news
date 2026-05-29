@@ -7,5 +7,7 @@ export interface IAudioPlayer {
   // tba: get handle for playing and stopping samples
 
   getHandle(src: string) : IAudioHandle;
-  freeHandle(handle: IAudioHandle) : void;
+  freeHandle(handle: IAudioHandle): void;
+
+  stop(): any;
 }

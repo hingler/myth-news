@@ -42,7 +42,7 @@ export class BroadcastRunner {
     if (this.currentScene != null) {
       yield* this.currentScene.FinishScene();
     }
-    
+
     let newScene = this.fac.createScene(info);
     yield* this.initializeScene(newScene);
     yield* this.runEventList(info);

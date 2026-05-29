@@ -21,6 +21,12 @@ export class SimpleAudioPlayer extends Node implements IAudioPlayer {
     yield this.add(<Audio ref={audioRef} src={src} play={true}/>);
   }
 
+  public *stop() {
+    for (const p of this.players) {
+      p().pause();
+    }
+  }
+
   public getHandle(src: string) : IAudioHandle {
     const audioRef = createRef<Audio>();
     // or: run on thread and make the method sync??
@@ -31,7 +37,7 @@ export class SimpleAudioPlayer extends Node implements IAudioPlayer {
   public freeHandle(handle: IAudioHandle) {
     if (this.mappedPlayers.has(handle)) {
       let r = this.mappedPlayers.get(handle);
-      
+
       handle.pause();
       r().remove();
       this.mappedPlayers.delete(handle);
