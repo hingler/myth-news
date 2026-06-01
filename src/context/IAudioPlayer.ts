@@ -8,6 +8,7 @@ export interface IAudioPlayer {
 
   getHandle(src: string) : IAudioHandle;
   freeHandle(handle: IAudioHandle): void;
+  setVolume(handle: IAudioHandle, volume: number) : IAudioHandle;
 
   stop(): any;
 }

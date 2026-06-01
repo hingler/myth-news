@@ -31,7 +31,18 @@ export class SimpleAudioPlayer extends Node implements IAudioPlayer {
     const audioRef = createRef<Audio>();
     // or: run on thread and make the method sync??
     this.add(<Audio ref={audioRef} src={src} play={false}/>);
-    return new SimpleAudioHandle(audioRef);
+    return new SimpleAudioHandle(audioRef, src);
+  }
+
+  public setVolume(handle: IAudioHandle, volume: number) : IAudioHandle {
+    const audioRef = createRef<Audio>();
+    const src = handle.getSrc();
+    const playhead = handle.getPlayhead();
+
+    handle.pause();
+
+    this.add(<Audio ref={audioRef} src={src} volume={volume} time={playhead} play={true} />);
+    return new SimpleAudioHandle(audioRef, src);
   }
 
   public freeHandle(handle: IAudioHandle) {

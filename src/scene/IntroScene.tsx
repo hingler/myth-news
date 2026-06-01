@@ -1,4 +1,4 @@
-import { all, createRef, linear, Reference } from "@revideo/core";
+import { all, createRef, linear, Reference, tween } from "@revideo/core";
 import { INewsScene } from "./INewsScene";
 import { NewsroomScene } from "./NewsroomScene";
 import { INewsContext } from "../context/INewsContext";
@@ -7,6 +7,7 @@ import moment from "moment";
 import { IBaseEvent } from "../dialogue/event/IBaseEvent";
 import { SceneInfo } from "../dialogue/parser/SceneInfo";
 import { IAudioHandle } from "../context/IAudioHandle";
+import { IAudioPlayer } from "../context/IAudioPlayer";
 
 const baseTitle : TxtProps = {
   fill: "#9BEDF0",
@@ -34,6 +35,8 @@ export class IntroScene implements INewsScene {
   private readonly bgmSrc: string;
   private bgm: IAudioHandle | null;
 
+  private player: IAudioPlayer | null;
+
   public constructor(
     title: string,
     duration: number,
@@ -44,6 +47,7 @@ export class IntroScene implements INewsScene {
     this.duration = duration;
     this.bgmSrc = bgmSrc;
     this.bgm = null;
+    this.player = null;
   }
 
   public static fromScene(info: SceneInfo) : IntroScene {
@@ -85,6 +89,7 @@ export class IntroScene implements INewsScene {
     let opacityAnim = fadeRef().opacity(0.5, this.duration).to(0.0, 0.2);
 
     this.bgm = yield context.getAudioPlayer().getHandle(this.bgmSrc);
+    this.player = context.getAudioPlayer();
     yield* this.bgm.play();
     yield* all(titleAnim, opacityAnim);
   }
@@ -95,7 +100,21 @@ export class IntroScene implements INewsScene {
   public *FinishScene() {
     // tba: add some means of tagging this handle
     //      so we can pick it up in another scene
-    yield this.bgm?.setVolume(0.0, 2.5);
+    let t_prev = 0;
+    // tba: fade logarithmically
+    const interval = 0.05
+    yield tween(2.5, (t) => {
+      const tp_mod = t_prev % interval;
+      const t_mod = t % interval;
+      if (tp_mod > t_mod && t < 1) {
+        this.bgm = this.player?.setVolume(this.bgm, Math.pow(10, -t * 2.5));
+      } else if (t == 1) {
+        this.bgm.pause();
+      }
+
+      t_prev = t;
+    });
+
     yield* this.d.FinishScene();
   }
 }

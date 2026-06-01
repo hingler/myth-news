@@ -133,7 +133,7 @@ const scene = makeScene2D('scene', function* (view) {
   yield* waitFor(0.5);
 });
 
-const dialogue_path = "/res/21/dialogue.xml"
+const dialogue_path = "/res/23/dialogue.xml"
 
 export default makeProject({
   scenes: [scene],
